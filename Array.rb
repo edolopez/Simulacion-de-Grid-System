@@ -13,11 +13,14 @@ class Array
   end
   
   def tamano_en_tiempo(tiempo)
-    size = 0
-    self.each do |evento|
-      size+=1 if evento.tiempo >= tiempo
+    tamano = 0
+    self.each_with_index do |evento, index|
+      if evento.tiempo >= tiempo
+        tamano = self.size-index
+        break
+      end
     end
-    size
+    tamano
   end
   
   def primero_despues_de_tiempo(tiempo)
