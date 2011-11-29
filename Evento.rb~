@@ -1,9 +1,0 @@
-# Clase Evento que guarda el tiempo del evento y el tipo de evento
-class Evento
-  attr_accessor :tiempo, :tipo
-  
-  def initialize(tiempo, tipo)
-    @tiempo = tiempo
-    @tipo = tipo
-  end
-end
