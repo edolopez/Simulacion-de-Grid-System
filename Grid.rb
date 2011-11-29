@@ -36,9 +36,9 @@ class Grid
     promedio = 0
     @procesadores.each{|p| promedio+=p.tiempo_promedio_en_sistema}
     puts "\nPromedio de tiempo en el GRID #{promedio/@nProcesadores}"
-#    tiempos = @procesadores.map{|p| p.tiempo_promedio_en_sistema}
-#    puts "Tiempo promedio maximo de un Procesador en el GRID #{tiempos.max}"
-#    puts "Tiempo promedio minimo de un Procesador en el GRID #{tiempos.min}"
+    tiempos = @procesadores.map{|p| p.tiempo_promedio_en_sistema}
+    puts "Tiempo promedio maximo de un Procesador en el GRID #{tiempos.max}"
+    puts "Tiempo promedio minimo de un Procesador en el GRID #{tiempos.min}"
     tareas = 0
     @procesadores.each{|p| tareas+=p.mensajes_promedio}
     puts "Promedio de Tareas en GRID #{tareas/@nProcesadores}"

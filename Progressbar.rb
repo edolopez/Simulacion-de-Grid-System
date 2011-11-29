@@ -49,7 +49,7 @@ class Progressbar
       printable_percent = "%3s" % percent
     else
       non_decimal_digits = (Math.log(percent) / Math.log(10)).truncate + 1
-      printable_percent = (non_decimal_digits < 3 ? " " * (3 - non_decimal_digits) : "") + percent.round.to_s
+      printable_percent = (non_decimal_digits < 3 ? " " * (3 - non_decimal_digits) : "") + percent.floor.to_s
     end
 
     print "]\e[32m #{printable_percent}\e[0m %"
