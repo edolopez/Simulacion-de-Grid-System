@@ -7,13 +7,13 @@ class Brocker
     @tipo = tipo
   end
   
-  def procesadores_asignados(procesadores, nProcesadores, nproc)
+  def procesadores_asignados(procesadores, nProcesadores, nproc, tiempo)
     if @tipo == "RoundRobin"
       return round_robin(procesadores, nProcesadores, nproc)
     elsif @tipo == "List"
-      return list(procesadores, nproc)
+      return list(procesadores, nproc, tiempo)
     elsif @tipo == "Paretofractal"
-      return paretofractal(procesadores, nproc)
+      return paretofractal(procesadores, nproc, tiempo)
     end
   end
   
@@ -23,11 +23,11 @@ class Brocker
     processors
   end
   
-  def list(procesadores, nproc)
-    (procesadores.sort {|a,b| a.listaEventos.size <=> b.listaEventos.size}).first(nproc)
+  def list(procesadores, nproc, tiempo)
+    (procesadores.sort {|a,b| (a.listaEventos.tamano_en_tiempo tiempo) <=> (b.listaEventos.tamano_en_tiempo tiempo)}).first(nproc)
   end
   
-  def paretofractal(procesadores, nproc)
-    (procesadores.sort {|a,b| a.tiempo_paretofractal <=> b.tiempo_paretofractal}).first(nproc)
+  def paretofractal(procesadores, nproc, tiempo)
+    (procesadores.sort {|a,b| (a.tiempo_paretofractal tiempo) <=> (b.tiempo_paretofractal tiempo)}).first(nproc)
   end
 end

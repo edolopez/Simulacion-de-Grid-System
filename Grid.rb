@@ -1,6 +1,7 @@
 require_relative 'Evento'
 require_relative 'Procesador'
 require_relative 'Brocker'
+require_relative 'Progressbar'
 
 class Grid
 
@@ -11,28 +12,38 @@ class Grid
     @nProcesadores = nProcesadores # numero de procesadores
     @procesadores = Array.new(@nProcesadores){Procesador.new} #arreglo de procesadores
     @input_file = File.new("datos_test.csv", "r")
-    @tiempo = 0 #tiempo del grip
+    @tiempo = 0 #tiempo del grid
+    @ultima_llegada = 0
     @brocker = brocker
+    @numero_tareas = 65535
   end  
   
   def simulate
     @input_file.gets
+    num = 0
+    progressbar = Progressbar.new
+    puts("\nBrocker con la estrategia #{@brocker.tipo}")
+    progressbar.progress 0
     while(line = @input_file.gets)
+      num += 1
+      progressbar.progress ((num/(@numero_tareas*1.0))*100)
       genera_llegada_y_salida line
-      Procesador.run @procesadores
+      Procesador.run @procesadores, @ultima_llegada
     end
     while(Procesador.tareas_pendientes? @procesadores)
-      Procesador.run @procesadores
+      Procesador.run @procesadores, 1/0.0
     end
-     puts "\nBrocker con la estrategia #{@brocker.tipo}\n"
-     promedio = 0
-     @procesadores.each{|p| promedio+=p.tiempo_promedio_en_sistema}
-     puts "Promedio de tiempo en el GRID #{promedio/@nProcesadores}"
-     tareas = 0
-     @procesadores.each{|p| tareas+=p.mensajes_promedio}
-     puts "Promedio de Tareas en GRID #{tareas/@nProcesadores}"
-     makespan = @procesadores.map{|p| p.tiempo}
-     puts "Makespan del GRID #{makespan.max}\n"
+    promedio = 0
+    @procesadores.each{|p| promedio+=p.tiempo_promedio_en_sistema}
+    puts "\nPromedio de tiempo en el GRID #{promedio/@nProcesadores}"
+#    tiempos = @procesadores.map{|p| p.tiempo_promedio_en_sistema}
+#    puts "Tiempo promedio maximo de un Procesador en el GRID #{tiempos.max}"
+#    puts "Tiempo promedio minimo de un Procesador en el GRID #{tiempos.min}"
+    tareas = 0
+    @procesadores.each{|p| tareas+=p.mensajes_promedio}
+    puts "Promedio de Tareas en GRID #{tareas/@nProcesadores}"
+    makespan = @procesadores.map{|p| p.tiempo}
+    puts "Makespan del GRID #{makespan.max}\n"
      #imprimimos los datos para cada procesador
 #     @nProcesadores.times do |i|
 #      puts "Procesador #{i+1}\n"
@@ -47,20 +58,15 @@ class Grid
   
   def genera_llegada_y_salida(line)
     runtime,nproc=line.split(",")
-    if (nproc.to_i <= @nProcesadores)  # Si el numero de procesadores solicitados es menor o igual que los del sistema
-      processors = @brocker.procesadores_asignados(@procesadores, @nProcesadores, nproc.to_i)
-      
+    if (nproc.to_i <= @nProcesadores)  # Si el numero de procesadores solicitados es menor o igual que los del sistema      
+      tEvento = @ultima_llegada + ((-1 * Math.log(rand)) / @lambda)
+      processors = @brocker.procesadores_asignados(@procesadores, @nProcesadores, nproc.to_i, tEvento)
       salidamax = (processors.map{|p| p.salida_maxima}).max
-  #    processors.each do |procesador|
-  #      salidamax = procesador.salida_maxima if procesador.salida_maxima > salidamax
-  #    end
-      
-      tEvento = @tiempo + ((-1 * Math.log(rand)) / @lambda)
       processors.each do |procesador|
         procesador.agregar_evento Evento.new(tEvento, "llegada", runtime.to_f)
         procesador.agregar_evento Evento.new(([tEvento, salidamax].max)+runtime.to_f, "salida", runtime.to_f)
       end
-      @tiempo = tEvento
+      @ultima_llegada = tEvento
     else
   #   puts 'tarea descartada\n'
     end
@@ -77,7 +83,7 @@ end
 
 puts "-----------------"
 puts "Simulacion con #{proc} procesadores"
-grid = Grid.new(Brocker.new("RoundRobin"), proc)
+grid = Grid.new(Brocker.new("List"), proc)
 grid.simulate
 
 grid = Grid.new(Brocker.new("List"), proc)

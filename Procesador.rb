@@ -18,9 +18,9 @@ class Procesador
     @listaEventos = [] #lista de eventos
   end
   
-  def self.run(procesadores)
+  def self.run(procesadores, tiempo)
     procesadores.each do |procesador|
-      procesador.simulate if procesador.tareas_en_fila?
+      procesador.simulate tiempo if procesador.tareas_en_fila?
     end
   end
   
@@ -30,21 +30,24 @@ class Procesador
     end
     return false
   end
-  
+
   #
   # metodo que inicia la simulacion
   #
-  def simulate
+  def simulate(tiempo)
+    evento = @listaEventos.first
+    if evento.tiempo <= tiempo
       evento = @listaEventos.shift
-      
       if evento.tipo == "llegada"
         procesa_llegada evento.tiempo
-#        puts "Llegada del mensaje #{@llegadas} al sistema en T=#{@tiempo} --- Hay #{@nTrabajos} Paquetes en Sistema"
+  #          puts "Llegada del mensaje #{@llegadas} al sistema en T=#{@tiempo} --- Hay #{@nTrabajos} Paquetes en Sistema"
       else
         #procesamos la salida
         procesa_salida evento.tiempo
-#        puts "Salida del mensaje #{@salidas} al sistema en T=#{@tiempo} --- Hay #{@nTrabajos} Paquetes en Sistema"
-      end 
+  #          puts "Salida del mensaje #{@salidas} al sistema en T=#{@tiempo} --- Hay #{@nTrabajos} Paquetes en Sistema"
+      end
+#      puts @tiempo
+    end
   end
   
   def utilizacion
@@ -127,22 +130,18 @@ class Procesador
     @listaEventos.any?
   end
   
-  def tiempo_paretofractal
-    tiempo_de_fila + tiempo_procesamiento
+  def tiempo_paretofractal(tiempo)
+    tiempo_de_fila(tiempo) + tiempo_procesamiento(tiempo)
   end
   
-  def tiempo_de_fila
-    if @listaEventos.any?
-      n = (@listaEventos.size/2)
-      n*0.000342291+((600*(n**0.8))/(0.05**(1/1.58)))
-    else
-      0
-    end
+  def tiempo_de_fila(tiempo)
+    n = ((@listaEventos.tamano_en_tiempo tiempo)/2)
+    n*0.000342291+((600*(n**0.8))/(0.05**(1/1.58)))
   end
   
-  def tiempo_procesamiento
+  def tiempo_procesamiento(tiempo)
     if @listaEventos.any?
-      @listaEventos.first.runtime*((0.05**(-1/1.58))-1)
+      @listaEventos.primero_despues_de_tiempo(tiempo).runtime*((0.05**(-1/1.58))-1)
     else
       0
     end
