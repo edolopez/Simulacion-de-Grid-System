@@ -83,7 +83,7 @@ end
 
 puts "-----------------"
 puts "Simulacion con #{proc} procesadores"
-grid = Grid.new(Brocker.new("List"), proc)
+grid = Grid.new(Brocker.new("RoundRobin"), proc)
 grid.simulate
 
 grid = Grid.new(Brocker.new("List"), proc)

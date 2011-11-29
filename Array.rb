@@ -1,3 +1,4 @@
+require_relative "Evento"
 #agregamos un metodo a la clase Array para insertar los eventos en orden
 
 class Array
@@ -37,7 +38,7 @@ class Array
       end
     end
     return self[l] if l < self.size and l >= 0 and l == u and self[l].tiempo > tiempo
-    return 0
+    return Evento.new(0,0,0)
   end
   
 end
